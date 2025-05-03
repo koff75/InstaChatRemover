@@ -1,4 +1,4 @@
-# SequentialDmDeleter for Instagram
+# InstaChatRemover for Instagram
 
 [![Language](https://img.shields.io/badge/Language-JavaScript-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 
