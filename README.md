@@ -4,6 +4,8 @@
 
 A browser console script to sequentially delete entire Instagram Direct Message conversations.
 
+Tested on : 05/03/2025
+
 ## Description
 
 This JavaScript snippet automates the deletion of Instagram Direct Message conversations directly from your browser's developer console. It simulates the clicks required to delete the currently open chat thread, waits for the interface to update, and then automatically selects the next conversation in the list. The script repeats this process up to a defined number of times (default is 40), allowing for quicker cleanup of multiple chat threads.
