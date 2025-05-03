@@ -1,0 +1,182 @@
+/**
+ * Simple Chat Deletion Script
+ *
+ * Supprime les conversations, sélectionne la suivante, et répète
+ * l'opération jusqu'à 40 fois.
+ *
+ */
+(async function() {
+    // Fonction pour introduire un délai (en millisecondes)
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    const maxLoops = 40; // Nombre maximum de conversations à supprimer
+    let chatsDeleted = 0;
+
+    console.log(`InstaPurge Chat Deleter v7: Démarrage de la boucle pour ${maxLoops} chats.`);
+
+    for (let i = 0; i < maxLoops; i++) {
+        console.log(`--- Itération ${i + 1} sur ${maxLoops} ---`);
+
+        // Attendre un peu au début de chaque boucle (sauf la première)
+        // pour s'assurer que la page de la conversation précédente est chargée
+        if (i > 0) {
+             console.log("Attente avant de traiter la nouvelle conversation...");
+             await delay(500);
+        }
+
+
+        // --- Étape 1 : Trouver et cliquer sur le bouton "Informations sur la conversation" ---
+        console.log("Recherche du bouton 'Informations sur la conversation'...");
+        let infoButton = null;
+        try {
+            const infoSvg = document.querySelector('svg[aria-label="Conversation information"]');
+            if (infoSvg) {
+                infoButton = infoSvg.closest('div[role="button"]');
+            }
+            // Fallback classe (moins stable)
+            if (!infoButton) {
+                console.log("Recherche par aria-label échouée, essai avec les classes...");
+                 infoButton = document.querySelector('div.x1i10hfl.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x6s0dn4.xjbqb8w.x1ejq31n.xd10rxx.x1sy0etr.x17r0tee.x1ypdohk.x78zum5.xl56j7k.xcdnw81.xexx8yu.x4uap5.x18d9i69.xkhd6sd[role="button"]');
+            }
+        } catch (e) {
+            console.error("Erreur lors de la recherche du bouton 'Informations':", e);
+        }
+
+        if (!infoButton) {
+            console.error(`Itération ${i + 1}: Bouton 'Informations sur la conversation' introuvable. Arrêt de la boucle.`);
+            break; // Arrête la boucle
+        }
+        console.log(`Itération ${i + 1}: Clic sur le bouton 'Informations sur la conversation'...`);
+        infoButton.click();
+        await delay(500); // Pause pour le panneau
+
+        // --- Étape 2 : Trouver et cliquer sur le bouton "Supprimer la discussion" ---
+        console.log(`Itération ${i + 1}: Recherche du bouton 'Supprimer la discussion' ou 'Delete chat'...`);
+        let deleteChatButton = null;
+        const targetTextFR_DeleteChat = 'Supprimer la discussion';
+        const targetTextEN_DeleteChat = 'Delete chat';
+        try {
+            const potentialButtons = document.querySelectorAll('div[role="button"]');
+             for (const btn of potentialButtons) {
+                 const span = btn.querySelector('span');
+                 const buttonText = (span ? span.textContent : btn.textContent).trim();
+                  if (buttonText === targetTextFR_DeleteChat || buttonText === targetTextEN_DeleteChat) {
+                     deleteChatButton = btn;
+                     console.log(`Bouton '${buttonText}' trouvé par texte.`);
+                     break;
+                 }
+            }
+             if (!deleteChatButton) {
+                 console.log("Recherche par texte échouée, essai avec les classes...");
+                 deleteChatButton = document.querySelector('div.x1i10hfl.xjbqb8w.x1ejq31n.xd10rxx.x1sy0etr.x17r0tee.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x87ps6o.x1d5wrs8[role="button"]');
+                 if(deleteChatButton) console.log("Bouton trouvé par classes.");
+             }
+        } catch (e) {
+            console.error("Erreur lors de la recherche du bouton 'Supprimer la discussion':", e);
+        }
+
+        if (!deleteChatButton) {
+            console.error(`Itération ${i + 1}: Bouton 'Supprimer la discussion' introuvable. Arrêt de la boucle.`);
+            break; // Arrête la boucle
+        }
+        console.log(`Itération ${i + 1}: Clic sur le bouton 'Supprimer la discussion'...`);
+        deleteChatButton.click();
+        await delay(500); // Pause pour la modale
+
+        // --- Étape 3 : Trouver et cliquer sur le bouton "Supprimer" de confirmation ---
+        console.log(`Itération ${i + 1}: Recherche du bouton de confirmation 'Supprimer' ou 'Delete'...`);
+        let confirmDeleteButton = null;
+        const confirmTargetTextFR_Delete = 'Supprimer';
+        const confirmTargetTextEN_Delete = 'Delete';
+        try {
+             const dialogs = document.querySelectorAll('div[role="dialog"]');
+             if (dialogs.length > 0) {
+                 const lastDialog = dialogs[dialogs.length - 1];
+                 const buttonsInDialog = lastDialog.querySelectorAll('button');
+                 for (const btn of buttonsInDialog) {
+                     const buttonText = btn.textContent.trim();
+                      if (buttonText === confirmTargetTextFR_Delete || buttonText === confirmTargetTextEN_Delete) {
+                         confirmDeleteButton = btn;
+                         console.log(`Bouton de confirmation '${buttonText}' trouvé par texte.`);
+                         break;
+                     }
+                 }
+             }
+             if (!confirmDeleteButton) {
+                 console.log("Recherche par texte échouée, essai avec les classes...");
+                  confirmDeleteButton = document.querySelector('button.xjbqb8w.x1qhh985.xcfux6l.xm0m39n.x1yvgwvq.x13fuv20.x178xt8z.x1ypdohk.xvs91rp.x1evy7pa.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.x1wxaq2x.x1iorvi4.x1sxyh0.xjkvuk6.xurb0ha.x2b8uid.x87ps6o.xxymvpz.xh8yej3.x52vrxo.x4gyw5p.xkmlbd1.x1xlr1w8');
+                  if(confirmDeleteButton) console.log("Bouton de confirmation trouvé par classes.");
+             }
+        } catch (e) {
+            console.error("Erreur lors de la recherche du bouton de confirmation 'Supprimer':", e);
+        }
+
+        if (!confirmDeleteButton) {
+            console.error(`Itération ${i + 1}: Bouton de confirmation 'Supprimer' introuvable. Arrêt de la boucle.`);
+            break; // Arrête la boucle
+        }
+        console.log(`Itération ${i + 1}: Clic sur le bouton de confirmation 'Supprimer'...`);
+        confirmDeleteButton.click();
+        chatsDeleted++;
+        console.log(`Suppression ${chatsDeleted} initiée.`);
+
+        // Vérifier si on a atteint le nombre maximum
+        if (chatsDeleted >= maxLoops) {
+            console.log(`Nombre maximum de ${maxLoops} suppressions atteint.`);
+            break; // Sortir de la boucle
+        }
+
+        // --- Étape 4 : Attendre et sélectionner la PREMIÈRE conversation suivante ---
+        console.log(`Itération ${i + 1}: Attente de la mise à jour de l'interface (7 secondes)...`);
+        await delay(500); // Délai pour permettre le rafraîchissement
+
+        console.log(`Itération ${i + 1}: Recherche de la prochaine conversation (la première dans la liste)...`);
+        let nextChatDiv = null;
+        try {
+            const chatListContainer = document.querySelector('div[aria-label="Chats"][role="list"]');
+            if (chatListContainer) {
+                 // Méthode 1: Sélecteur spécifique basé sur l'exemple HTML
+                 nextChatDiv = chatListContainer.querySelector('div.x1n2onr6 > div > div[style*="opacity: 1"] > div[role="button"]');
+                 if (nextChatDiv) {
+                      console.log("Première conversation trouvée avec le sélecteur spécifique.");
+                 }
+
+                 // Méthode 2 (Fallback) : Premier lien <a>
+                 if (!nextChatDiv) {
+                     console.log("Échec méthode 1. Essai avec le premier lien a[href^='/direct/t/']...");
+                     const nextChatLink = chatListContainer.querySelector('a[href^="/direct/t/"]');
+                      if (nextChatLink) {
+                          nextChatDiv = nextChatLink.closest('div[role="button"]') || nextChatLink;
+                          if (nextChatDiv) console.log("Premier lien trouvé et/ou son conteneur cliquable.");
+                      } else {
+                          console.log("Aucun lien de conversation (a[href^='/direct/t/']) trouvé.");
+                      }
+                 }
+            } else {
+                console.error("Conteneur de la liste de chats (div[aria-label='Chats']) non trouvé après suppression.");
+            }
+        } catch (e) {
+            console.error("Erreur lors de la recherche de la conversation suivante:", e);
+        }
+
+        if (!nextChatDiv) {
+            console.error(`Itération ${i + 1}: Impossible de trouver la conversation suivante à sélectionner. Arrêt de la boucle.`);
+            break; // Arrête la boucle
+        }
+
+        console.log(`Itération ${i + 1}: Sélection de la conversation suivante...`);
+        nextChatDiv.click();
+
+        // Si ce n'est pas la dernière boucle, attendre un peu avant la prochaine itération
+        if (i < maxLoops - 1) {
+             console.log(`Fin de l'itération ${i + 1}. Attente de 3 secondes avant la prochaine suppression...`);
+             await delay(500);
+        }
+
+    } // Fin de la boucle for
+
+    console.log(`InstaPurge Chat Deleter v7: Terminé. ${chatsDeleted} conversations supprimées.`);
+
+})(); // Exécute immédiatement la fonction
