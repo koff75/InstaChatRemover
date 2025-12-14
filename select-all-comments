@@ -1,0 +1,62 @@
+(async function instagramSelectOnly() {
+    // --- CONFIGURATION ---
+    // URL : https://www.instagram.com/your_activity/interactions/comments
+    const TIME_BETWEEN_CHECKS = 100; // Vitesse de sélection
+
+    // Fonction de pause
+    const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+    // Fonction pour trouver un élément par son texte (Gère Anglais et Français)
+    function getElementByText(textStrings) {
+        const xpath = `//*[${textStrings.map(t => `contains(text(), '${t}')`).join(' or ')}]`;
+        const result = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        let elements = [];
+        for (let i = 0; i < result.snapshotLength; i++) {
+            let el = result.snapshotItem(i);
+            if (el.tagName === 'SPAN' || el.tagName === 'DIV' || el.tagName === 'BUTTON') {
+                 elements.push(el);
+            }
+        }
+        return elements;
+    }
+
+    console.log(`🚀 DÉMARRAGE DE LA SÉLECTION UNIQUEMENT`);
+
+    // --- ÉTAPE 1 : MODE SELECT ---
+    let selectBtns = getElementByText(["Select", "Sélect."]);
+    if (selectBtns.length > 0) {
+        try {
+            // On vérifie si "Cancel" est présent (signe que c'est déjà actif)
+            let cancelBtn = getElementByText(["Cancel", "Annuler"]);
+            if (cancelBtn.length === 0) {
+                selectBtns[0].click();
+                console.log("1️⃣ Bouton 'Select' cliqué.");
+                await delay(1500);
+            } else {
+                console.log("ℹ️ Mode sélection déjà actif.");
+            }
+        } catch (e) {
+            console.log("ℹ️ Erreur clic Select, on continue.");
+        }
+    }
+
+    // --- ÉTAPE 2 : COCHER LES COMMENTAIRES ---
+    // Basé sur la structure standard Bloks pour les checkboxes
+    const checkboxes = document.querySelectorAll('div[aria-label="Toggle checkbox"]');
+
+    if (checkboxes.length === 0) {
+        console.log("🛑 Aucun commentaire à sélectionner.");
+        return; 
+    }
+
+    console.log(`2️⃣ Sélection de ${checkboxes.length} commentaires...`);
+    for (const box of checkboxes) {
+        // Optionnel : vérification si déjà coché (selon le DOM Instagram, parfois nécessaire)
+        // Pour l'instant, on clique simplement comme dans le script original
+        box.click();
+        await delay(TIME_BETWEEN_CHECKS);
+    }
+
+    console.log("\n✅ TERMINE ! Tous les éléments visibles ont été sélectionnés.");
+
+})();
